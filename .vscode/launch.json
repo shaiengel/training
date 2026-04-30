@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train Whisper",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/train-whisper.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--output_model_name", "my-whisper-he",
+                "--model_name", "openai/whisper-small",
+                "--train_datasets", "C:/portal/dataset_builder/output/dataset[:24634]",
+                "--eval_datasets", "C:/portal/dataset_builder/output/dataset[24634:]",
+                "--target_language", "hebrew",
+                "--skip_push_to_hub",
+                "--use_qlora",
+                "--per_device_train_batch_size", "1",
+                "--gradient_accumulation_steps", "16"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Train Whisper (preprocessed)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/train-whisper.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--output_model_name", "my-whisper-he",
+                "--model_name", "ivrit-ai/whisper-large-v3",
+                "--use_preprocessed", "portal-daf-yomi/portal-daf-yomi-whisper-training",                
+                "--target_language", "hebrew",
+                "--skip_push_to_hub"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
