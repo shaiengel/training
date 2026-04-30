@@ -3,6 +3,7 @@ __pycache__
 
 # Visual Studio Code
 .vscode
+.claude
 
 # Ignore python virtual env folders
 .venv

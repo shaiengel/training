@@ -38,8 +38,19 @@ def load_datasets(dataset_specs):
     for spec in dataset_specs:
         parts = re.split(dataset_spec_split_pattern, spec)
 
+        # Re-merge Windows drive letter incorrectly treated as separator (e.g. ['C', '/path'])
+        if len(parts) >= 2 and re.match(r'^[A-Za-z]$', parts[0]):
+            parts = [parts[0] + ':' + parts[1]] + parts[2:]
+
         dataset_name = parts[0]
         split = parts[1] if len(parts) == 2 else "train"
+
+        # Support inline slice notation on the path itself, e.g. /path/to/dataset[:1000]
+        if split == "train":
+            inline_match = re.match(r'^(.+?)(\[[\d:]+\])$', dataset_name)
+            if inline_match:
+                dataset_name = inline_match.group(1)
+                split = inline_match.group(2)
 
         
         try:
@@ -55,21 +66,39 @@ def load_datasets(dataset_specs):
         except:
             dataset = load_from_disk(dataset_name)
             
-            # But, we want to support the flexible "split instruction" syntax like load_dataset provides.
-            # Hf made this extremely hard, by hiding the parsing and results inside a wrapped internal class.
-            # Why? why HF ?!
-            read_instruction = ReadInstruction.from_spec(split)
-            actual_ri_data = read_instruction._relative_instructions[0]
-            slice_units = actual_ri_data.unit
-            # We won't go that crazy - only support "abs" units (not pct syntax)
-            if slice_units != 'abs':
-                # This is such shame - HF please fix this.
-                raise ValueError(f'Unable to support the split definition: ${split} - please read the code for more details.')
+            # Handle single Dataset vs DatasetDict
+            from datasets import Dataset
+            is_single_dataset = isinstance(dataset, Dataset)
             
-            split_name = actual_ri_data.splitname
-            from_entry = actual_ri_data.from_
-            to_entry = actual_ri_data.to
-            dataset = dataset[split_name]
+            if is_single_dataset:
+                # For single datasets, parse simple slice syntax like [:1000] or [500:1000]
+                slice_match = re.match(r'\[(\d*):(\d*)\]', split)
+                if slice_match:
+                    from_entry = int(slice_match.group(1)) if slice_match.group(1) else None
+                    to_entry = int(slice_match.group(2)) if slice_match.group(2) else None
+                elif split == "train":
+                    # Default case, use entire dataset
+                    from_entry = None
+                    to_entry = None
+                else:
+                    raise ValueError(f"For single datasets, use slice syntax like [:1000] or [500:]. Got: {split}")
+            else:
+                # But, we want to support the flexible "split instruction" syntax like load_dataset provides.
+                # Hf made this extremely hard, by hiding the parsing and results inside a wrapped internal class.
+                # Why? why HF ?!
+                read_instruction = ReadInstruction.from_spec(split)
+                actual_ri_data = read_instruction._relative_instructions[0]
+                slice_units = actual_ri_data.unit
+                # We won't go that crazy - only support "abs" units (not pct syntax)
+                if slice_units != 'abs':
+                    # This is such shame - HF please fix this.
+                    raise ValueError(f'Unable to support the split definition: ${split} - please read the code for more details.')
+                
+                split_name = actual_ri_data.splitname
+                from_entry = actual_ri_data.from_
+                to_entry = actual_ri_data.to
+                dataset = dataset[split_name]
+            
             if from_entry is not None:
                 dataset = dataset.skip(from_entry)
             else:
@@ -323,6 +352,9 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
+    assert torch.cuda.is_available(), "CUDA is not available — training requires a GPU."
+    print(f"Using CUDA: {torch.cuda.get_device_name(0)} ({torch.cuda.device_count()} device(s))")
+
     if args.use_preprocessed and (args.train_datasets or args.eval_datasets):
         raise ValueError("Cannot use both preprocessed data and specify train/eval datasets. Choose one method.")
 
@@ -337,6 +369,7 @@ def main():
         condition_on_prev_sample_prob=args.include_prev_text_prob,
         inject_synthetic_timestamps=args.inject_synthetic_timestamps,
         audio_shift_augmentation=args.audio_shift_augmentation,
+        device="cuda" if torch.cuda.is_available() else "cpu",
     )
 
     dataset_shuffle_seed = 745

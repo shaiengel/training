@@ -73,9 +73,20 @@ This script allows you to convert ASR models (like Whisper) to various formats i
 
 ## Installation
 
+Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+
 ```bash
-pip install -r requirements.txt
+uv venv --system-site-packages
+uv sync
 ```
+
+The `--system-site-packages` flag is required on Windows because uv's isolated build
+environment does not expose `pkg_resources` to `openai-whisper`'s legacy `setup.py`.
+Combining it with `no-build-isolation-package = ["openai-whisper"]` (already set in
+`pyproject.toml`) lets the build find the system's `setuptools`/`pkg_resources`.
+
+On Linux this flag is usually not needed — try `uv sync` first and only fall back to
+`uv venv --system-site-packages --clear && uv sync` if you see a `pkg_resources` error.
 
 ## Usage
 

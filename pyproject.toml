@@ -4,7 +4,67 @@ version = "0.1.0"
 description = "ASR training recipes created for ivrit.ai"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "audiosample==2.2.6",
+    # The below version fixes an incompatibility in AudioSample
+    # If this is not fixed soon - ditch AudioSample which is probably
+    # not mature enough for production
+    "av>=12.3.0,<14",
+    "bitsandbytes",
+    "datasets<4.0.0",
+    "faster-whisper",
+    "librosa",
+    "mutagen",
+    "numpy",
+    "openai-whisper",
+    "pydub",
+    "soundfile",
+    "torch",
+    "torchaudio",
+    "transformers==4.48.1",
+    "openai",
+    "python-dotenv",
+    "jiwer",
+    "pandas",
+    "peft",
+    "evaluate",
+    "webvtt-py",
+    "scipy",
+    "tqdm",
+    "pydantic",
+    "accelerate",
+    "boto3",
+    "google-cloud-speech",
+    "google-cloud-storage",
+    "amazon-transcribe",
+    "hebrew",
+    "runpod",
+    "stable_ts==2.18.3",
+    "ctranslate2",
+    "optimum",
+    "onnx",
+    "onnxruntime",
+    "setuptools",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["preprocess"]
+
+[tool.uv]
+no-build-isolation-package = ["openai-whisper"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
 
 [tool.black]
 line-length = 120
