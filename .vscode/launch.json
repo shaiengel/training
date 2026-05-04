@@ -30,9 +30,34 @@
             "args": [
                 "--output_model_name", "my-whisper-he",
                 "--model_name", "ivrit-ai/whisper-large-v3",
-                "--use_preprocessed", "portal-daf-yomi/portal-daf-yomi-whisper-training",                
+                "--use_preprocessed", "portal-daf-yomi/portal-daf-yomi-whisper-training",
                 "--target_language", "hebrew",
                 "--skip_push_to_hub"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Train Whisper (HF Dataset Test)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/train-whisper.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--output_model_name", "my-whisper-he-hf-test",
+                "--model_name", "openai/whisper-small",
+                "--use_preprocessed", "portal-daf-yomi/portal-daf-yomi-whisper-training",
+                "--target_language", "hebrew",
+                "--skip_push_to_hub",
+                "--per_device_train_batch_size", "1",
+                "--per_device_eval_batch_size", "1",
+                "--gradient_accumulation_steps", "4",
+                "--max_steps", "10",
+                "--eval_steps", "5",
+                "--logging_steps", "5",
+                "--save_steps", "10",
+                "--max_eval_set_size", "50",
+                "--use_qlora"
             ],
             "console": "integratedTerminal",
             "justMyCode": false

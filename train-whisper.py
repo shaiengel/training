@@ -386,7 +386,7 @@ def main():
 
         if len(preprocessed_dataset_dicts) == 1:
             train_set = dataset_dict["train"]
-            eval_set = dataset_dict["eval"]
+            eval_set = dataset_dict["eval"] if "eval" in dataset_dict else dataset_dict["test"]
         else:
             probs = None
             if args.use_preprocessed_probs is not None:

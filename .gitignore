@@ -18,6 +18,7 @@ local_datasets
 
 # Temporary Scrips
 tmp_*.py
+*.stackdump
 
 # Local Configuration files
 config/
