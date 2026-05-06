@@ -79,7 +79,6 @@ Dependencies are managed with [uv](https://docs.astral.sh/uv/).
 uv venv --system-site-packages
 uv sync
 ```
-
 The `--system-site-packages` flag is required on Windows because uv's isolated build
 environment does not expose `pkg_resources` to `openai-whisper`'s legacy `setup.py`.
 Combining it with `no-build-isolation-package = ["openai-whisper"]` (already set in
@@ -87,6 +86,16 @@ Combining it with `no-build-isolation-package = ["openai-whisper"]` (already set
 
 On Linux this flag is usually not needed — try `uv sync` first and only fall back to
 `uv venv --system-site-packages --clear && uv sync` if you see a `pkg_resources` error.
+
+### vast.ai Requirements
+
+When renting a vast.ai instance for training:
+
+- **Disk**: Set container disk to at least **60GB**. The CUDA-bundled PyTorch wheels (torch, torchaudio, nvidia-cudnn, nvidia-cublas, etc.) alone require ~8GB, leaving little room on smaller disks. The default 32GB is not enough.
+- **VRAM**:
+  - Whisper small/medium: 16GB VRAM is sufficient with QLoRA
+  - Whisper large-v3: requires 24GB+ VRAM (e.g. RTX 3090/4090) even with QLoRA
+- **HF cache**: Set `HF_HOME` to a path with sufficient space before running, e.g. `export HF_HOME=/workspace/.hf_home`
 
 ## Usage
 
