@@ -29,6 +29,9 @@ def transcribe_batch(pipeline: ASRInferencePipeline, entries: list[Dict[str, Any
         transcription_time = time.time() - start_time
         results = [(t, transcription_time / len(temp_paths)) for t in transcriptions]
         return results
+    except Exception as e:
+        print(f"Exception calling omnilingual-asr: {e}")
+        raise e
     finally:
         for path in temp_paths:
             if os.path.exists(path):

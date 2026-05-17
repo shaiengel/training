@@ -24,6 +24,7 @@ tmp_*.py
 # Local Configuration files
 config/
 my-whisper-he*
+evaluation_results.csv
 
 # Local Tracker outputs
 wandb

@@ -17,17 +17,24 @@ def create_app(**kwargs) -> Callable:
     processor = WhisperProcessor.from_pretrained(model_path)
 
     def transcribe(entry):
-        audio_resample = librosa.resample(
-            entry["audio"]["array"], orig_sr=entry["audio"]["sampling_rate"], target_sr=16000
-        )
-        input_features = processor(audio_resample, sampling_rate=16000, return_tensors="pt").input_features
-        input_features = input_features.to(model.device)
+        if isinstance(entry, list):
+            return [transcribe(e) for e in entry]
 
-        start_time = time.time()
-        predicted_ids = model.generate(input_features, language="he", num_beams=5)
-        transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
-        transcription_time = time.time() - start_time
+        try:
+            audio_resample = librosa.resample(
+                entry["audio"]["array"], orig_sr=entry["audio"]["sampling_rate"], target_sr=16000
+            )
+            input_features = processor(audio_resample, sampling_rate=16000, return_tensors="pt").input_features
+            input_features = input_features.to(model.device)
 
-        return transcription[0], transcription_time
+            start_time = time.time()
+            predicted_ids = model.generate(input_features, language="he", num_beams=5)
+            transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+            transcription_time = time.time() - start_time
+
+            return transcription[0], transcription_time
+        except Exception as e:
+            print(f"Exception in transformers transcribe: {e}")
+            raise e
 
     return transcribe

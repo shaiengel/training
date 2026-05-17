@@ -7,18 +7,24 @@ import soundfile
 
 
 def transcribe(model, entry: Dict[str, Any]) -> Tuple[str, float]:
+    if isinstance(entry, list):
+        return [transcribe(model, e) for e in entry]
+
     wav_buffer = io.BytesIO()
     soundfile.write(wav_buffer, entry["audio"]["array"], entry["audio"]["sampling_rate"], format="WAV")
     wav_buffer.seek(0)
 
-    start_time = time.time()
-    texts = []
-    segs, dummy = model.transcribe(wav_buffer, language="he")
-    for s in segs:
-        texts.append(s.text)
-    transcription_time = time.time() - start_time
-
-    return " ".join(texts), transcription_time
+    try:
+        start_time = time.time()
+        texts = []
+        segs, dummy = model.transcribe(wav_buffer, language="he", beam_size=5)
+        for s in segs:
+            texts.append(s.text)
+        transcription_time = time.time() - start_time
+        return " ".join(texts), transcription_time
+    except Exception as e:
+        print(f"Exception calling faster-whisper: {e}")
+        raise e
 
 
 def get_device_and_index(device: str) -> tuple[str, int | None]:

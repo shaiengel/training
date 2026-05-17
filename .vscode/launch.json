@@ -126,6 +126,51 @@
             "justMyCode": false
         },
         {
+            "name": "Evaluate omnilingual-asr 7B Unlimited (CUDA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/omnilingual_engine.py",
+                "--model", "omniASR_LLM_Unlimited_7B_v2",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cuda"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Evaluate whisper-large-v3 HF (CUDA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/transformers_engine.py",
+                "--model", "openai/whisper-large-v3",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cuda"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Evaluate faster-whisper large-v3 (CUDA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/faster_whisper_engine.py",
+                "--model", "ivrit-ai/whisper-large-v3-ct2",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cuda"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Evaluate ElevenLabs scribe_v2",
             "type": "debugpy",
             "request": "launch",
