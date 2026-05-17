@@ -425,6 +425,7 @@ if __name__ == "__main__":
     parser.add_argument("--benchmark-timing", type=int, default=None, metavar="N",
                         help="Run each transcription N times and store all timing results")
     parser.add_argument("--batch-size", type=int, default=1, help="Batch size for transcription processing")
+    parser.add_argument("--limit", type=int, default=None, help="Limit evaluation to the first N entries")
     parser.add_argument("--parallel-mode", type=str, choices=["thread", "process"], default="thread",
                         help="Parallelism backend: 'thread' (default, ThreadPoolExecutor) or "
                              "'process' (torch.multiprocessing with one process per device)")
@@ -468,7 +469,7 @@ if __name__ == "__main__":
             ds_meta = datasets.load_dataset(dataset_name, name=args.name, trust_remote_code=True)[dataset_split]
         else:
             ds_meta = datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
-        ds_length = len(ds_meta)
+        ds_length = min(args.limit, len(ds_meta)) if args.limit else len(ds_meta)
         del ds_meta  # free before spawning to keep parent memory footprint small
 
         print(f"Beginning evaluation with {len(devices)} worker processes on devices: {devices}")
@@ -507,6 +508,8 @@ if __name__ == "__main__":
             ds = datasets.load_dataset(dataset_name, name=args.name, trust_remote_code=True)[dataset_split]
         else:
             ds = datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
+        if args.limit:
+            ds = ds.select(range(min(args.limit, len(ds))))
 
         print(f"Beginning evaluation with {args.workers} workers.")
         results_df = evaluate_model(transcribe_fn, ds, ds_text_column, args.workers, args.benchmark_timing, args.batch_size)

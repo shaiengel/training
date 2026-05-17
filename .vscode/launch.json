@@ -1,6 +1,6 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [        
         {
             "name": "Train Whisper",
             "type": "debugpy",
@@ -59,6 +59,24 @@
                 "--max_eval_set_size", "50",
                 "--use_qlora"
             ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Evaluate Google Speech",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/google_speech_engine.py",
+                "--model", "google-speech-api",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cpu"
+            ],
+            // "env": {
+            //     "GOOGLE_APPLICATION_CREDENTIALS": ""
+            // },
             "console": "integratedTerminal",
             "justMyCode": false
         }
