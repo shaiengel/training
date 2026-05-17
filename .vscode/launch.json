@@ -79,6 +79,36 @@
             // },
             "console": "integratedTerminal",
             "justMyCode": false
+        },        
+        {
+            "name": "Evaluate Amazon Transcribe (batch)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/amazon_transcribe_engine.py",
+                "--model", "batch",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cpu"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Evaluate OpenAI gpt-4o-transcribe",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/openai_api_engine.py",
+                "--model", "gpt-4o-transcribe",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cpu"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

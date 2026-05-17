@@ -8,6 +8,7 @@ __pycache__
 # Ignore python virtual env folders
 .venv
 env
+.env
 venv
 
 # Data Folders
