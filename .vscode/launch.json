@@ -109,6 +109,36 @@
             ],
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Evaluate Gemini 2.5 Pro",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/gemini_engine.py",
+                "--model", "gemini-2.5-pro",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cpu"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Evaluate ElevenLabs scribe_v2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/elevenlabs_engine.py",
+                "--model", "scribe_v2",
+                "--dataset", "portal-daf-yomi/portal-daf-yomi-evaluation:train:transcript",
+                "--device", "cpu"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

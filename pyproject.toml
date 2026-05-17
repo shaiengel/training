@@ -46,6 +46,8 @@ dependencies = [
     "onnxruntime",
     "setuptools",
     "tensorboard>=2.20.0",
+    "elevenlabs>=2.47.0",
+    "google-generativeai>=0.8.6",
 ]
 
 [build-system]
