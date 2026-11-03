@@ -48,6 +48,7 @@ dependencies = [
     "tensorboard>=2.20.0",
     "elevenlabs>=2.47.0",
     "google-generativeai>=0.8.6",
+    "wandb>=0.31.0",
 ]
 
 [build-system]

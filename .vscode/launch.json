@@ -1,6 +1,21 @@
 {
     "version": "0.2.0",
-    "configurations": [        
+    "configurations": [
+        {
+            "name": "Make LR Search Subset",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/make_subset.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--train_size", "2000",
+                "--test_size", "300",
+                "--out_dir", "C:/portal/dataset_builder/output/lr_subset",
+                "--push_to_hub", "portal-daf-yomi/portal-daf-yomi-lr-subset"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
         {
             "name": "Train Whisper",
             "type": "debugpy",
