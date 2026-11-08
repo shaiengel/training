@@ -15,6 +15,31 @@ from hebrew import Hebrew
 from tqdm import tqdm
 
 
+def load_eval_dataset(dataset_name, dataset_split, name=None, text_column="text"):
+    """Load a dataset split from the HF Hub, or from a local CSV with an 'audio' (file path) column.
+
+    In a CSV, the text column may hold the reference text itself or a path to a .txt file containing it.
+    Relative paths are resolved against the CSV's directory.
+    """
+    if dataset_name.lower().endswith(".csv"):
+        ds = datasets.load_dataset("csv", data_files={dataset_split: dataset_name})[dataset_split]
+        base_dir = os.path.dirname(os.path.abspath(dataset_name))
+
+        def resolve_paths(entry):
+            resolved = {"audio": os.path.join(base_dir, entry["audio"])}
+            text = entry[text_column]
+            if text and text.lower().endswith(".txt"):
+                with open(os.path.join(base_dir, text), encoding="utf-8-sig") as f:
+                    resolved[text_column] = " ".join(f.read().split())
+            return resolved
+
+        ds = ds.map(resolve_paths)
+        return ds.cast_column("audio", datasets.Audio(sampling_rate=16000))
+    if name:
+        return datasets.load_dataset(dataset_name, name=name, trust_remote_code=True)[dataset_split]
+    return datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
+
+
 def clean_some_unicode_from_text(text):
     chars_to_remove = "\u061C"  # Arabic letter mark
     chars_to_remove += "\u200B\u200C\u200D"  # Zero-width space, non-joiner, joiner
@@ -129,7 +154,8 @@ def calculate_final_metrics(df: pandas.DataFrame):
 
 def calculate_transcription_time_stats(df: pandas.DataFrame):
     """Calculate transcription time statistics for segments >= 5 seconds: per audio second, per output character, and raw transcription time"""
-    
+    df["predicted_text"] = df["predicted_text"].fillna("")
+
     # Calculate audio durations and text lengths, filtering segments >= 5 seconds
     audio_durations = []
     text_lengths = []
@@ -218,10 +244,7 @@ def _mp_worker(
         # Each worker loads the dataset independently to avoid serializing
         # large audio arrays across process boundaries.
         print(f"[Worker {rank}] Loading dataset {dataset_name!r} ({dataset_split})...")
-        if dataset_name_arg:
-            ds = datasets.load_dataset(dataset_name, name=dataset_name_arg, trust_remote_code=True)[dataset_split]
-        else:
-            ds = datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
+        ds = load_eval_dataset(dataset_name, dataset_split, dataset_name_arg, text_column)
 
         normalizer = HebrewTextNormalizer()
 
@@ -415,7 +438,8 @@ if __name__ == "__main__":
     parser.add_argument("--engine", type=str, required=True, help="Path to engine script")
     parser.add_argument("--model", type=str, required=True, help="Model to use")
     parser.add_argument(
-        "--dataset", type=str, required=True, help="Dataset to evaluate in format dataset_name:<split>:<text_column>"
+        "--dataset", type=str, required=True, help="Dataset to evaluate in format dataset_name:<split>:<text_column>. "
+        "dataset_name may be a local .csv with an 'audio' column of file paths (relative to the CSV)"
     )
     parser.add_argument("--name", type=str, required=False, help="Optional name parameter for dataset.load_dataset")
     parser.add_argument("--output", type=str, default="evaluation_results.csv", help="Output CSV file path")
@@ -438,6 +462,9 @@ if __name__ == "__main__":
 
     # Parse dataset info from command line argument
     dataset_parts = args.dataset.split(":")
+    # Keep a Windows drive letter (e.g. C:/data/eval.csv) as part of the dataset path
+    if len(dataset_parts) > 1 and len(dataset_parts[0]) == 1 and dataset_parts[1][:1] in ("/", "\\"):
+        dataset_parts = [dataset_parts[0] + ":" + dataset_parts[1]] + dataset_parts[2:]
     dataset_name = dataset_parts[0]
     dataset_split = dataset_parts[1] if len(dataset_parts) > 1 else "test"
     ds_text_column = dataset_parts[2] if len(dataset_parts) > 2 else "text"
@@ -465,10 +492,7 @@ if __name__ == "__main__":
         # sharding. We avoid loading audio here to keep memory lean; each
         # worker reloads the full dataset.
         print(f"Loading dataset {args.dataset} (to determine length)...")
-        if args.name:
-            ds_meta = datasets.load_dataset(dataset_name, name=args.name, trust_remote_code=True)[dataset_split]
-        else:
-            ds_meta = datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
+        ds_meta = load_eval_dataset(dataset_name, dataset_split, args.name, ds_text_column)
         ds_length = min(args.limit, len(ds_meta)) if args.limit else len(ds_meta)
         del ds_meta  # free before spawning to keep parent memory footprint small
 
@@ -504,10 +528,7 @@ if __name__ == "__main__":
         transcribe_fn = engine.create_app(model_path=args.model, device=args.device)
 
         print(f"Loading dataset {args.dataset}...")
-        if args.name:
-            ds = datasets.load_dataset(dataset_name, name=args.name, trust_remote_code=True)[dataset_split]
-        else:
-            ds = datasets.load_dataset(dataset_name, trust_remote_code=True)[dataset_split]
+        ds = load_eval_dataset(dataset_name, dataset_split, args.name, ds_text_column)
         if args.limit:
             ds = ds.select(range(min(args.limit, len(ds))))
 

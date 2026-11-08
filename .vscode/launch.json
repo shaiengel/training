@@ -186,6 +186,23 @@
             "justMyCode": false
         },
         {
+            "name": "Evaluate faster-whisper ct2 on local CSV (CUDA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluate_model.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                "--engine", "engines/faster_whisper_engine.py",
+                "--model", "${workspaceFolder}/portal-whisper-large-v3-1000-ct2",
+                // CSV columns: audio (mp3 path, absolute or relative to the CSV), text
+                "--dataset", "${workspaceFolder}/portal-evaluation-dataset/eval.csv:test:text",
+                "--device", "cuda",
+                "--output", "eval_csv_portal-whisper-large-v3-1000-ct2.csv"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Evaluate ElevenLabs scribe_v2",
             "type": "debugpy",
             "request": "launch",
