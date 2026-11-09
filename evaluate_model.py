@@ -110,8 +110,12 @@ def process_entry(args):
 
         entry_metrics = jiwer.process_words([ref_text], [eval_text])
 
+        audio_id_path = entry.get("audio", {}).get("path", "") if isinstance(entry, dict) else ""
+        entry_id = os.path.splitext(os.path.basename(audio_id_path))[0] if audio_id_path else i
+
         entry_data = {
             "id": i,
+            "file_id": entry_id,
             "reference_text": raw_ref_text,
             "predicted_text": raw_eval_text,
             "norm_reference_text": ref_text,
