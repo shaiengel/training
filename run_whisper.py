@@ -31,7 +31,7 @@ import whisper.normalizers
 #    - Models: large-v2, large-v3, user-trained models
 
 
-def initialize_model(engine, model_path, tuned_model_path):
+def initialize_model(engine, model_path, tuned_model_path, compute_type="float16"):
     if engine == "openai-whisper":
         model = whisper.load_model(model_path)
 
@@ -80,7 +80,7 @@ def initialize_model(engine, model_path, tuned_model_path):
         return transcribe
 
     if engine == "faster-whisper":
-        model = faster_whisper.WhisperModel(model_path, compute_type="float32")
+        model = faster_whisper.WhisperModel(model_path, compute_type=compute_type)
 
         def transcribe(filename):
             return transcribe_faster_whisper(model, filename)
@@ -229,12 +229,13 @@ if __name__ == "__main__":
         "--tuned-model", type=str, required=False, help="Huggingface-style tuned model. Can be hosted or local."
     )
     parser.add_argument("--file", type=str, required=True, help="File to transcribe.")
+    parser.add_argument("--compute-type", type=str, default="float16", help="Compute type (float16, float32, int8).")
 
     # Parse the arguments
     args = parser.parse_args()
 
     print(f"Loading model {args.model}, tuned model is {args.tuned_model}...")
-    transcribe_fn = initialize_model(args.engine, args.model, args.tuned_model)
+    transcribe_fn = initialize_model(args.engine, args.model, args.tuned_model, getattr(args, "compute_type", "float16"))
 
     print(f"Transcribing {args.file}...")
     text = transcribe_fn(args.file)
