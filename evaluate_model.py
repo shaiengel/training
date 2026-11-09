@@ -73,6 +73,11 @@ def process_entry(args):
     if not isinstance(entries, list):
         entries = [entries]
 
+    for entry in entries:
+        audio_path = entry.get("audio", {}).get("path", "") if isinstance(entry, dict) else entry
+        if audio_path:
+            print(f"Processing: {os.path.basename(audio_path)}")
+
     results = transcribe_fn(entries)
     if not isinstance(results, list):
         results = [results]
@@ -127,6 +132,9 @@ def process_entry(args):
         for key in entry.keys():
             if key not in ["audio", text_column]:
                 entry_data[f"metadata_{key}"] = entry[key]
+
+        audio_path = entry.get("audio", {}).get("path", "") if isinstance(entry, dict) else ""
+        print(f"Done: {os.path.basename(audio_path)} WER={entry_metrics.wer:.5f} WIL={entry_metrics.wil:.5f}")
 
         entry_data_list.append(entry_data)
 
@@ -397,7 +405,7 @@ def evaluate_model_multiprocess(
     return pandas.DataFrame(entries_data)
 
 
-def evaluate_model(transcribe_fn, ds, text_column, num_workers=1, benchmark_timing=None, batch_size=1):
+def evaluate_model(transcribe_fn, ds, text_column, num_workers=1, benchmark_timing=None, batch_size=1, output_path=None):
     normalizer = HebrewTextNormalizer()
     entries_data = []
 
@@ -427,6 +435,9 @@ def evaluate_model(transcribe_fn, ds, text_column, num_workers=1, benchmark_timi
                     last_wil = batch_results[-1]["wil"]
                     pbar.set_postfix(last_wer=f"{last_wer:.5f}", last_wil=f"{last_wil:.5f}")
                 pbar.update(len(batch_results))
+                if output_path:
+                    partial_df = pandas.DataFrame(sorted(entries_data, key=lambda x: x["id"]))
+                    partial_df.to_csv(output_path, encoding="utf-8", index=False)
 
     # Sort results by ID to maintain original order
     entries_data.sort(key=lambda x: x["id"])
@@ -533,7 +544,7 @@ if __name__ == "__main__":
             ds = ds.select(range(min(args.limit, len(ds))))
 
         print(f"Beginning evaluation with {args.workers} workers.")
-        results_df = evaluate_model(transcribe_fn, ds, ds_text_column, args.workers, args.benchmark_timing, args.batch_size)
+        results_df = evaluate_model(transcribe_fn, ds, ds_text_column, args.workers, args.benchmark_timing, args.batch_size, output_path=args.output)
 
         # Add model and dataset info as columns
         results_df["model"] = args.model
