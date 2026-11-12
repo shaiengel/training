@@ -248,6 +248,11 @@ class DatasetPreparator:
                 # Remove all timestamp tokens
                 token_ids = [token_id for token_id in token_ids if token_id < self.timestamp_begin_token_id]
                 # Note - no-timestamp token id is prepended as part of the prefix later.
+            else:
+                # Cross-over slice - timestamps must stay. Flip the decision so the
+                # prefix tokens and the prev text handling agree with the kept tokens.
+                # Otherwise the label would be "<|notimestamps|>" followed by timestamp tokens.
+                should_train_on_timestamps = True
 
         prev_ids = []
         if should_condition_on_prev and has_prev:
