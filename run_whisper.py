@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 
 import librosa
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
@@ -74,8 +75,16 @@ def initialize_model(engine, model_path, tuned_model_path, compute_type="float16
             device=device,
         )
 
+        # def transcribe(filename):
+        #     result = pipe(filename, generate_kwargs={"language": "hebrew"}, return_timestamps=True)
+        #     for chunk in result["chunks"]:
+        #         ts = chunk["timestamp"]
+        #         print(f"[{ts[0]:.1f}s - {ts[1]:.1f}s] {chunk['text']}")
+        #     return result["text"]
+
         def transcribe(filename):
             return pipe(filename, generate_kwargs={"language": "hebrew"})["text"]
+
 
         return transcribe
 
@@ -204,9 +213,23 @@ def transcribe_openai_whisper(model, filename):
 
 
 def transcribe_faster_whisper(model, filename):
+    logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
     texts = []
-    segs, dummy = model.transcribe(filename, language="he")
+    segs, info = model.transcribe(
+        filename,
+        language="he",        
+        # condition_on_previous_text=True,
+        # compression_ratio_threshold=2.8
+    )
+    # for s in segs:
+    #     print(
+    #         f"[{s.start:.1f}s - {s.end:.1f}s] (seek={s.seek}, temp={s.temperature}, no_speech={s.no_speech_prob:.3f}, "
+    #         f"avg_logprob={s.avg_logprob:.3f}, compression={s.compression_ratio:.2f}) {s.text}"
+    #     )
+    #     texts.append(s.text)
     for s in segs:
+        print(f"{s.text}")
         texts.append(s.text)
 
     return " ".join(texts)

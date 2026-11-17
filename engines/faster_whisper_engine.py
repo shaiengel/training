@@ -17,7 +17,13 @@ def transcribe(model, entry: Dict[str, Any]) -> Tuple[str, float]:
     try:
         start_time = time.time()
         texts = []
-        segs, dummy = model.transcribe(wav_buffer, language="he", beam_size=5)
+        segs, dummy = model.transcribe(
+            wav_buffer, 
+            language="he", 
+            beam_size=5
+            # condition_on_previous_text=True,
+            # compression_ratio_threshold=2.8
+            )
         for s in segs:
             texts.append(s.text)
         transcription_time = time.time() - start_time

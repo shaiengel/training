@@ -17,6 +17,22 @@
             "justMyCode": false
         },
         {
+            "name": "Make LR Search Subset (local dataset_split)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/make_subset.py",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "args": [
+                // Already split by source_id, so train/test subsets share no lesson
+                "--source", "C:/portal/dataset_builder/output/dataset_split",
+                "--train_size", "2000",
+                "--test_size", "300",
+                "--out_dir", "C:/portal/dataset_builder/output/lr_subset"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Train Whisper",
             "type": "debugpy",
             "request": "launch",
