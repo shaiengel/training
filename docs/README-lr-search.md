@@ -88,38 +88,80 @@ Model: `ivrit-ai/whisper-large-v3` (1.55B params). GPU: NVIDIA RTX 6000 Ada / L4
 Commands used:
 
 ```bash
-python train-whisper.py --output_model_name lr-prep --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --train_datasets <user>/daf-yomi-lr-subset:train --eval_datasets <user>/daf-yomi-lr-subset:test --save_processed /workspace/training/output/lr_prep --ds_processor_proc_num 4
+python train-whisper.py --output_model_name lr-prep --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --train_datasets <user>/daf-yomi-lr-subset:train --eval_datasets <user>/daf-yomi-lr-subset:test --save_processed /workspace/lr_subset_processed_large --ds_processor_proc_num 4
 
-uv run python train-whisper.py --output_model_name lr-1e-4 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/training/output/lr_prep --learning_rate 1e-4 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-4 --mixed_precision bf16
+uv run python train-whisper.py --output_model_name lr-1e-4 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/lr_subset_processed_large --learning_rate 1e-4 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-4 --mixed_precision bf16
 
-uv run python train-whisper.py --output_model_name lr-5e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/training/output/lr_prep --learning_rate 5e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-5 --mixed_precision bf16
+uv run python train-whisper.py --output_model_name lr-5e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/lr_subset_processed_large --learning_rate 5e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-5 --mixed_precision bf16
 
-uv run python train-whisper.py --output_model_name lr-3e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/training/output/lr_prep --learning_rate 3e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-3e-5 --mixed_precision bf16
+uv run python train-whisper.py --output_model_name lr-3e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/lr_subset_processed_large --learning_rate 3e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-3e-5 --mixed_precision bf16
 
-uv run python train-whisper.py --output_model_name lr-1e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/training/output/lr_prep --learning_rate 1e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-5 --mixed_precision bf16
+uv run python train-whisper.py --output_model_name lr-1e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/lr_subset_processed_large --learning_rate 1e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-5 --mixed_precision bf16
 
-uv run python train-whisper.py --output_model_name lr-5e-6 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/training/output/lr_prep --learning_rate 5e-6 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-6 --mixed_precision bf16
+uv run python train-whisper.py --output_model_name lr-5e-6 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3 --use_preprocessed /workspace/lr_subset_processed_large --learning_rate 5e-6 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-6 --mixed_precision bf16
 ```
 
 ### Eval loss by epoch
 
 | Epoch | 1e-4  | 5e-5  | 3e-5  | 1e-5  | 5e-6  |
 |-------|-------|-------|-------|-------|-------|
-| 0.2   | 0.574 | 0.488 | 0.458 | 0.446 | 0.459 |
-| 0.4   | 0.586 | 0.483 | 0.440 | 0.419 | 0.423 |
-| 0.6   | 0.567 | 0.469 | 0.434 | 0.407 | 0.411 |
-| 0.8   | 0.553 | 0.474 | 0.427 | 0.400 | 0.405 |
-| 1.0   | 0.548 | 0.449 | 0.420 | 0.395 | 0.397 |
+| 0.2   | 0.562 | 0.468 | 0.438 | 0.421 | 0.430 |
+| 0.4   | 0.553 | 0.463 | 0.423 | 0.400 | 0.400 |
+| 0.6   | 0.549 | 0.454 | 0.416 | 0.388 | 0.390 |
+| 0.8   | 0.545 | 0.449 | 0.408 | 0.382 | 0.384 |
+| 1.0   | 0.532 | 0.432 | 0.400 | 0.376 | 0.378 |
 
 ### Final train loss
 
 | LR   | 1e-4  | 5e-5  | 3e-5  | 1e-5  | 5e-6  |
 |------|-------|-------|-------|-------|-------|
-| Loss | 0.569 | 0.480 | 0.452 | 0.438 | 0.451 |
+| Loss | 0.553 | 0.462 | 0.433 | 0.417 | 0.427 |
 
 ### Analysis
 
-1e-5 wins: lowest eval loss (0.395), still dropping at epoch 1.0, no signs of plateau. Higher LRs overshoot — the pretrained model benefits from gentle fine-tuning. 5e-6 is close but converges slightly slower; 1e-4 and 5e-5 flatten early.
+1e-5 wins: lowest eval loss (0.376) and lowest train loss (0.417), still dropping at epoch 1.0, no signs of plateau. 5e-6 is very close (0.378) but converges slightly slower. Higher LRs are worse: 1e-4 and 5e-5 end well above the others (0.532 and 0.432), so the pretrained model benefits from gentle fine-tuning. No run spikes or diverges. These results come from the rerun after the dataset fixes.
+
+Note: batch size here is 4 × 4 = 16 (same effective batch as section 4). If you change the batch size for the real run, the LR may need re-tuning.
+
+## Results: full fine-tuning, whisper-large-v3-turbo
+
+Model: `ivrit-ai/whisper-large-v3-turbo` (809M params). GPU: NVIDIA RTX PRO 6000 Blackwell Workstation Edition. bf16 training, batch 4 × 4 gradient accumulation (effective batch 16), 125 steps (one epoch over 2000 samples), 10 warmup steps.
+
+Commands used:
+
+```bash
+python train-whisper.py --output_model_name lr-prep --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --train_datasets <user>/daf-yomi-lr-subset:train --eval_datasets <user>/daf-yomi-lr-subset:test --save_processed /workspace/lr_subset_processed_large_turbo --ds_processor_proc_num 4
+
+uv run python train-whisper.py --output_model_name lr-1e-4 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --use_preprocessed /workspace/lr_subset_processed_large_turbo --learning_rate 1e-4 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-4 --mixed_precision bf16
+
+uv run python train-whisper.py --output_model_name lr-5e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --use_preprocessed /workspace/lr_subset_processed_large_turbo --learning_rate 5e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-5 --mixed_precision bf16
+
+uv run python train-whisper.py --output_model_name lr-3e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --use_preprocessed /workspace/lr_subset_processed_large_turbo --learning_rate 3e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-3e-5 --mixed_precision bf16
+
+uv run python train-whisper.py --output_model_name lr-1e-5 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --use_preprocessed /workspace/lr_subset_processed_large_turbo --learning_rate 1e-5 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-1e-5 --mixed_precision bf16
+
+uv run python train-whisper.py --output_model_name lr-5e-6 --skip_push_to_hub --model_name ivrit-ai/whisper-large-v3-turbo --use_preprocessed /workspace/lr_subset_processed_large_turbo --learning_rate 5e-6 --max_steps 125 --per_device_train_batch_size 4 --gradient_accumulation_steps 4 --warmup_steps 10 --logging_steps 5 --eval_steps 25 --save_steps 100000 --run_name lr-5e-6 --mixed_precision bf16
+```
+
+### Eval loss by epoch
+
+| Epoch | 1e-4  | 5e-5  | 3e-5  | 1e-5  | 5e-6  |
+|-------|-------|-------|-------|-------|-------|
+| 0.2   | 0.752 | 0.598 | 0.541 | 0.511 | 0.522 |
+| 0.4   | 0.803 | 0.587 | 0.530 | 0.484 | 0.485 |
+| 0.6   | 0.717 | 0.575 | 0.523 | 0.470 | 0.471 |
+| 0.8   | 0.720 | 0.569 | 0.509 | 0.463 | 0.460 |
+| 1.0   | 0.708 | 0.561 | 0.495 | 0.455 | 0.454 |
+
+### Final train loss
+
+| LR   | 1e-4  | 5e-5  | 3e-5  | 1e-5  | 5e-6  |
+|------|-------|-------|-------|-------|-------|
+| Loss | 0.731 | 0.583 | 0.535 | 0.506 | 0.518 |
+
+### Analysis
+
+1e-5 wins again: tied with 5e-6 on final eval loss (0.455 vs 0.454) but converges faster (lower train loss 0.506 vs 0.518), still dropping at epoch 1.0. 1e-4 overshoots badly — eval spikes to 0.803 at epoch 0.4 before partially recovering. The turbo model (809M params) shows the same preference for gentle fine-tuning as v3 (1.55B params), with overall higher loss values due to the smaller decoder.
 
 Note: batch size here is 4 × 4 = 16 (same effective batch as section 4). If you change the batch size for the real run, the LR may need re-tuning.
 
