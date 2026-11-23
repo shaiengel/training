@@ -273,7 +273,8 @@ class WindowLog:
     ending:
       open       the last segment was left unclosed. Upstream restarts at the last timestamp, nothing is lost.
       single     the model closed its last segment and stopped. Upstream jumps a full window.
-      collapsed  no consecutive timestamps (one long segment). Upstream jumps a full window.
+      collapsed  no consecutive timestamps (one long segment). With word_timestamps=True upstream restarts at
+                 the last word, nothing is lost. Without word_timestamps it jumps a full window.
     gap is the window end minus the last timestamp token. For collapsed windows only the opening timestamp
     exists, so the gap prints about 30s, which is an artifact.
     budget is the number of output tokens the prompt leaves. A window is cut off when output_tokens reaches it.
@@ -281,7 +282,8 @@ class WindowLog:
     Must wrap the model before fix_window_seek, so it sees the ending the model produced.
     """
 
-    JUMP_ENDINGS = ("single", "collapsed")
+    # With word_timestamps=True only single windows lose audio.
+    LOSSY_ENDING = "single"
 
     def __init__(self, model):
         self.model = model
@@ -327,14 +329,14 @@ class WindowLog:
 
     def print_summary(self, gap_threshold=1.0):
         endings = [ending for ending, _, _ in self.entries]
-        risky = [gap for ending, gap, _ in self.entries if ending in self.JUMP_ENDINGS and gap > gap_threshold]
+        risky = [gap for ending, gap, _ in self.entries if ending == self.LOSSY_ENDING and gap > gap_threshold]
         print(
             f"[window summary] windows={len(endings)} single={endings.count('single')} "
             f"open={endings.count('open')} collapsed={endings.count('collapsed')} "
-            f"full_jump_with_gap>{gap_threshold:.1f}s={len(risky)}"
+            f"single_with_gap>{gap_threshold:.1f}s={len(risky)}"
         )
         for ending, _, line in self.entries:
-            if ending in self.JUMP_ENDINGS:
+            if ending == self.LOSSY_ENDING:
                 print(line)
 
 
